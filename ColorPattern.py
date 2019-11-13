@@ -1,0 +1,6 @@
+
+
+class ColorPattern:
+
+    colorMatrix[][]
+    colorStack[] 
