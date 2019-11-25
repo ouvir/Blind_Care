@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-
-
+import turtle as t
 JudgeConstant = 3000
 LED = 31
 signal = 29
@@ -23,7 +22,7 @@ def setup():
     GPIO.setup(S3, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(signal, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     print("setup done...\n")
-
+    t.colormode(255)
 def loop():
     temp = 1
     while(1):
@@ -59,8 +58,13 @@ def loop():
         duration = time.time() - start
         green = NUM_CYCLES / duration
         print("green value - ", green)
-        
-
+        red =(int)( red / 145)
+        blue =(int)( blue / 145)
+        green =(int)( green / 145)
+        t.pen(pensize = "10")
+        t.pencolor(red,green,blue)
+        t.goto(0,0)
+        t.forward(40)
         offsetRB = red - blue
         offsetRG = red - green
         offsetBG = blue - green
@@ -77,7 +81,7 @@ def loop():
                 if offsetGB > JudgeConstant and offsetGR > JudgeConstant:
                     print("this is Green")
                 else:
-                    print("Cannot determine")
+                    print("No color detected(White)")
         
         time.sleep(2)
 
