@@ -2,46 +2,60 @@ import RPi.GPIO as GPIO
 import time
 import Transponder as Tp
 
-def LightUP(number): #회로의 번호
-    GPIO.output(self.number, True)
 
-def LightDOWN(number):
-    GPIO.output(self.number, False)
-            
 
-        
-start=0
-signal=0
-GPIO.setup(23, GPIO.OUT)#Red
-GPIO.setup(24, GPIO.OUT)#Orange
-GPIO.setup(25, GPIO.OUT)#Green
-   
-while True:
+
+signal = 0
+
+def setup():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(23, GPIO.OUT, initial=GPIO.LOW)#Red
+    GPIO.setup(24, GPIO.OUT, initial=GPIO.LOW)#Orange
+    GPIO.setup(26, GPIO.OUT, initial=GPIO.LOW)#Green
+def loop():   
+    global signal
+    while True:
         if  signal==0:
-            LightUP(23)
+            GPIO.output(23, GPIO.HIGH)
             time.sleep(10)
             #Red signal
             signal+=1
             
-        elif  signal==1:
-            LightUP(24)
+            
+        elif signal==1:
+            GPIO.output(24, GPIO.HIGH)
             time.sleep(5)
             #Orange signal
-            Signal+=1
+            signal+=1
             
         elif  signal==2:
-            LightUP(25)
+            
+            GPIO.output(26, GPIO.HIGH)
             k=10
             for i in range(10):
                 time.sleep(1)
                 k-=1
+                string = str(k)
                 number = Tp.RFID()
-                number.Write(k)
+                number.Write(string)
+                
             #Green signal
-            Signal-=2
-        else:
-            
-        LightDOWN(23)
-        LightDOWN(24)
-        LightDOWN(25)
-    
+            signal-=2
+        GPIO.cleanup()
+        setup()   
+        
+
+def endprogram():
+     GPIO.cleanup()
+
+
+if __name__=='__main__':
+     setup()
+
+     try:
+        loop()
+     except KeyboardInterrupt:
+        endprogram()
+
+
+GPIO.cleanup()
