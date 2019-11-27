@@ -1,54 +1,47 @@
 import RPi.GPIO as GPIO
 import time
+import Transponder as Tp
 
-class SignalLight:
-    signal=0
-    GPIO.setup(23, GPIO.OUT)#Red
-    GPIO.setup(24, GPIO.OUT)#Green
-    GPIO.setup(25, GPIO.OUT)#Orange
-        
-    def LightUP(self,number): #회로의 번호
-        GPIO.output(self.number, True)
+def LightUP(number): #회로의 번호
+    GPIO.output(self.number, True)
 
-    def LightDOWN(self,number):
-        GPIO.output(self.number, True)
+def LightDOWN(number):
+    GPIO.output(self.number, False)
             
-    def Operate(self):
-        while True:
-            if  SignalLight.signal==0:
-                G = 'No'
-                LightUP(23)
-                time.sleep(10)
-                LightDOWN(23)
-                #Red signal
-            if  SignalLight.signal==1:
-                G = 'Yes'
-                LightUP(23)
-                start = time.time()
-                time.sleep(10)
-                LightDOWN(23)
-                SignalColor+=1
-                #Green signal
-            if  SignalLight.signal==2:
-                G = 'No'
-                GPIO.output(23, False)    
-                GPIO.output(24, False)     
-                GPIO.output(25, True)    
-                time.sleep(3)
-                SignalColor-=1
-                #Orange signal
-  
-    def Gtime():
-        if G = 'Yes':
-            greentime = time.time-start
-            return greentime
-            #greentime is the time already used
-            #So, remain time is 10-greentime
+
+        
+start=0
+signal=0
+GPIO.setup(23, GPIO.OUT)#Red
+GPIO.setup(24, GPIO.OUT)#Orange
+GPIO.setup(25, GPIO.OUT)#Green
+   
+while True:
+        if  signal==0:
+            LightUP(23)
+            time.sleep(10)
+            #Red signal
+            signal+=1
+            
+        elif  signal==1:
+            LightUP(24)
+            time.sleep(5)
+            #Orange signal
+            Signal+=1
+            
+        elif  signal==2:
+            LightUP(25)
+            k=10
+            for i in range(10):
+                time.sleep(1)
+                k-=1
+                number = Tp.RFID()
+                number.Write(k)
+            #Green signal
+            Signal-=2
+        else:
+            
+        LightDOWN(23)
+        LightDOWN(24)
+        LightDOWN(25)
     
-'''How to use?
-signal = SignalLight()
-signal.Operate()
->>operate
-signal.Gtime()
->>time of Green
-'''
