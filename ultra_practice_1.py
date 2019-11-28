@@ -75,6 +75,7 @@ def main():
         print_distance(distance)
             
     GPIO.cleanup()
-        
+
+    
 if __name__ == '__main__':
     main()
