@@ -167,18 +167,34 @@ def UltraSensor(trig, echo, buzzer):
     GPIO.cleanup(echo)
     GPIO.cleanup(buzzer)
 
-def RFID_READ(SDA,SCK,MOSI,MISO,RST):
+def RFID_READ(SDA,SCK,MOSI,MISO,RST,BUZ):
+    GPIO.setmode(GPIO.BOARD)
     reader = SimpleMFRC522()
+    GPIO.setup(BUZ,GPIO.OUT)
+    p = GPIO.PWM(BUZ,100)
+    scale = [261,294,329,349,392,440,493,523]
+    list = [0,1,2,3,4,5,6,1,2,3,4,5,6]
     while True:
         time.sleep(0.5)
         id, text = reader.read()
         print(id)
-        print(text)
+        T=int(text)
+        remainT=T
+        p.start(100)
+        p.ChangeDutyCycle(70)
+        while remainT > 0:
+            time.sleep(1)
+            print(remainT)
+            p.ChangeFrequency(scale[list[T-remainT]])
+            remainT-=1
+        p.stop()
+        GPIO.output(BUZ,GPIO.LOW)
+               
         #Tell a text, and Count the text
 
 
 if __name__== "__main__":
-    x=threading.Thread(target=RFID_READ,name="RFID",args=(24,23,19,21,22))
+    x=threading.Thread(target=RFID_READ,name="RFID",args=(24,23,19,21,22,16))
     y=threading.Thread(target=UltraSensor,name="UltraSensor",args=(36,38,40))
     z=threading.Thread(target=ColorSensor,name="ColorSensor",args=(31,13,15,29))
     x.start()
