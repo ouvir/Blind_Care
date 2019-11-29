@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 from mfrc522 import SimpleMFRC522
 import threading
-
+import turtle as t
 
 
 def ColorSensor(LED,S2,S3,signal):
@@ -12,60 +12,124 @@ def ColorSensor(LED,S2,S3,signal):
     GPIO.setup(S3, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(signal, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     NUM_CYCLES = 10
-
+    
     while(1):
 
         
         #red filter set
         GPIO.output(S2, GPIO.LOW)
         GPIO.output(S3, GPIO.LOW)
-        time.sleep(0.1) #delay 0.1sec
-        start = time.time()
-        for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_edge(signal, GPIO.FALLING)
-        duration = time.time() - start
-        red =int(NUM_CYCLES / duration)
-        red = red - 1000 #offset due to abnormally high red light
-        if red <= 0:
-            red = 0
+        count = 0
+        JudgeConstant = 5
+        redcount = 0
+        bluecount = 0
+        greencount = 0
+        whitecount = 0
+        blackcount = 0
+        nocount = 0
+
+        while count < 100:
+            count = count + 1
+            time.sleep(0.003) #delay 0.1sec
+            start = time.time()
+            for impulse_count in range(NUM_CYCLES):
+                GPIO.wait_for_edge(signal, GPIO.FALLING)
+            duration = time.time() - start
+            red =int(NUM_CYCLES / duration)
+            if red <= 0:
+                red = 0
+
+            #blue filter set
+            GPIO.output(S2,GPIO.LOW)
+            GPIO.output(S3,GPIO.HIGH)
+            time.sleep(0.003)
+            start = time.time()
+            for impulse_count in range(NUM_CYCLES):
+                GPIO.wait_for_edge(signal, GPIO.FALLING)
+            duration = time.time() -start
+            blue =int(NUM_CYCLES / duration)
+            if blue <= 0:
+                blue = 0
+            #green filter set
+            GPIO.output(S2, GPIO.HIGH)
+            GPIO.output(S3, GPIO.HIGH)
+
+            time.sleep(0.003)
+            start = time.time()
+            for impulse_count in range(NUM_CYCLES):
+                GPIO.wait_for_edge(signal, GPIO.FALLING)
+            duration = time.time() - start
+            green =int(NUM_CYCLES / duration)
+            if green <= 0:
+                green = 0
+        
+            #calibration
+            white_level= 14000
+            black_level= 5000
+            raw_rgb = [red, green, blue]
+            rgb = [0,0,0]
+            x = (white_level - black_level) / 255
+            x=int(x)
+
+            for i in range(3):
+                rgb[i] =(int)((raw_rgb[i]-black_level)/x)
+            for i in range(3):
+                if rgb[i] > 255:
+                    rgb[i] = 255
+                elif rgb[i] < 0:
+                    rgb[i] = 0
+           # print("red:", rgb[0], "blue:",rgb[1], "green:",rgb[2])
+           # print("rawRGB:", raw_rgb)
+            
+           # offsetRB = rgb[0] - rgb[2]
+           # offsetRG = rgb[0] - rgb[1]
+           # offsetBG = rgb[2] - rgb[1]
+
+           # offsetBR = -offsetRB
+           # offsetGR = -offsetRG
+           # offsetGB = -offsetBG
+            average=int((rgb[0]+rgb[1]+rgb[2])/3)
+            if average < 30:
+                blackcount = blackcount + 1
+            elif average > 230:
+                whitecount = whitecount + 1
+            elif rgb[0] > average + 40:
+                redcount = redcount + 1
+            elif rgb[1] > average +40:
+                greencount = greencount + 1
+            elif rgb[2] > average +40:
+                bluecount = bluecount + 1
+            else:
+                nocount = nocount + 1
+
+        N=20
+        if redcount > bluecount + N and redcount > greencount + N and redcount > whitecount+N and redcount > blackcount +N and redcount > nocount+N:
+            print('red:', redcount)
+        elif bluecount > redcount + N and bluecount > greencount + N and bluecount > whitecount +N and bluecount > blackcount +N and bluecount >nocount+N:
+            print('blue:', bluecount)
+        elif greencount > redcount + N and greencount > bluecount + N and greencount > whitecount +N and greencount > blackcount +N and greencount > nocount +N:
+            print('green', greencount) 
+        elif blackcount > redcount + N and blackcount > bluecount + N and blackcount > whitecount +N and blackcount > greencount +N and blackcount > nocount +N:
+            print('black',blackcount)
+        elif whitecount > redcount + N and whitecount > bluecount + N and whitecount > blackcount +N and whitecount > greencount +N and whitecount > nocount +N:
+            print('white',whitecount)
+        elif nocount > redcount + N and nocount > bluecount + N and nocount > blackcount +N and nocount > greencount +N and nocount > whitecount +N:
+            print('None', nocount)
 
 
+        #drawing color
 
-        #blue filter set
-        GPIO.output(S2,GPIO.LOW)
-        GPIO.output(S3,GPIO.HIGH)
-        time.sleep(0.1)
-        start = time.time()
-        for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_edge(signal, GPIO.FALLING)
-        duration = time.time() -start
-        blue =int(NUM_CYCLES / duration)
-        if blue <= 0:
-            blue = 0
+        #t.colormode(255)
+        #t.pen(pensize="20")
+        #t.pencolor(rgb[0],rgb[1],rgb[2])
+        #t.goto(0,0)
+        #t.forward(40)
 
-        #green filter set
-        GPIO.output(S2, GPIO.HIGH)
-        GPIO.output(S3, GPIO.HIGH)
+                
+        
 
-        time.sleep(0.1)
-        start = time.time()
-        for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_edge(signal, GPIO.FALLING)
-        duration = time.time() - start
-        green =int(NUM_CYCLES / duration)
-        if green <= 0:
-            green = 0
+        
 
-        red=int(red/70)
-        blue=int(blue/70)
-        green=int(green/70)
-        if red > 255:
-            red = 255
-        if blue > 255:
-            blue = 255
-        if green > 255:
-            green = 255
-        print("red:", red, "blue:",blue, "green:",green)
 
 def UltraSensor(trig, echo, buzzer):
     GPIO.setmode(GPIO.BOARD)
@@ -116,7 +180,7 @@ def RFID_READ(SDA,SCK,MOSI,MISO,RST):
 if __name__== "__main__":
     x=threading.Thread(target=RFID_READ,name="RFID",args=(24,23,19,21,22))
     y=threading.Thread(target=UltraSensor,name="UltraSensor",args=(36,38,40))
-    z=threading.Thread(target=ColorSensor,name="ColorSensor",args=(31,7,11,29))
+    z=threading.Thread(target=ColorSensor,name="ColorSensor",args=(31,13,15,29))
     x.start()
     y.start()
     z.start()
