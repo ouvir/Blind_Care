@@ -86,29 +86,31 @@ def ColorSensor(LED,S2,S3,signal):
         offsetGB = -offsetBG
         average=int((rgb[0]+rgb[1]+rgb[2])/3)
         if average < 30:
-            blackcount = blackcount + 1
+            blackcount += 1
             print("black!")
             #buzzer!!
         elif average > 230:
-            whitecount = whitecount + 1
+            whitecount += 1
         elif rgb[0] > rgb[1] and rgb[0] > rgb[2]:
-            redcount += 1
+
             if offsetRG > JudgeConstant and offsetRB > JudgeConstant:
                 print("this is red")
+                redcount += 1
         elif rgb[1] > rgb[0] and rgb[1] > rgb[2]:
-            greencount+=1
+
             if offsetGB > JudgeConstant and offsetGR > JudgeConstant:
                 print("this is green")
+                greencount += 1
         elif rgb[2] > rgb[0] and rgb[2] > rgb[1]:
-            bluecount+=1
+
             if offsetBR > JudgeConstant and offsetBG > JudgeConstant:
                 print("this is blue")
+                bluecount += 1
         else:
             print("Undefined")
 
 
         if greencount > bluecount +5 and greencount > redcount +5:
-            global DISTANCE
             print("green dominant")
             redcount = 0
             bluecount = 0
