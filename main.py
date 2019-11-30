@@ -3,10 +3,20 @@ import time
 from mfrc522 import SimpleMFRC522
 import threading
 import turtle as t
+
+
+
 DISTANCE=0
 
 
 def ColorSensor(LED,S2,S3,signal):
+    '''
+    :param LED: GPIO-pin number(BOARD) for color sensor LED(fixed white light)
+    :param S2: GPIO-pin number(BOARD) for color filter
+    :param S3: GPIO-pin number(BOARD) for color filter
+    :param signal: GPIO-pin number(BOARD) for output of color sensor
+    :return: None
+    '''
     global DISTANCE
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(LED, GPIO.OUT, initial=GPIO.HIGH)
@@ -14,19 +24,30 @@ def ColorSensor(LED,S2,S3,signal):
     GPIO.setup(S3, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(signal, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     NUM_CYCLES = 10
+
+
+    #local varables for determination which color is dominant during given execution time
     redcount=0
     greencount=0
     bluecount=0
     whitecount=0
     blackcount=0
-    JudgeConstant = 30
+
+
+    JudgeConstant = 30  #RGB(255) offset for determination of color type
+
     while(1):
-        
+        '''
+        Filter  S2      S3
+        red     LOW     LOW
+        blue    LOW     HIGH
+        green   HIGH    HIGH        
+        '''
         #red filter set
         GPIO.output(S2, GPIO.LOW)
         GPIO.output(S3, GPIO.LOW)
 
-        time.sleep(0.1) #delay 0.1sec
+        time.sleep(0.1)
         start = time.time()
         for impulse_count in range(NUM_CYCLES):
             GPIO.wait_for_edge(signal, GPIO.FALLING)
@@ -59,14 +80,18 @@ def ColorSensor(LED,S2,S3,signal):
         if green <= 0:
             green = 0
 
-        #calibration
+        '''
+        Calibration:
+            warning: not so much adaptable for light changes since it has been done before execution
+                     I recommend to change white_level and black_level for different environment
+        '''
         white_level= 18000
         black_level= 5000
         raw_rgb = [red, green, blue]
         rgb = [0,0,0]
         x = (white_level - black_level) / 255
         x=int(x)
-
+        #processing raw data into RGB(255) values
         for i in range(3):
             rgb[i] =(int)((raw_rgb[i]-black_level)/x)
         for i in range(3):
