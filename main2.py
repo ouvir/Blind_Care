@@ -186,8 +186,6 @@ def RFID_READ(SDA,SCK,MOSI,MISO,RST,BUZ):
     reader = SimpleMFRC522()
     GPIO.setup(BUZ,GPIO.OUT)
     p = GPIO.PWM(BUZ,5)
-    scale=[32,36,41,43,48,55,61,65,73,82]
-    list=[8,7,6,5,4,3,2,1,0]
     while True:
         time.sleep(0.5)
         id, text = reader.read()
@@ -201,7 +199,6 @@ def RFID_READ(SDA,SCK,MOSI,MISO,RST,BUZ):
             print(remainT)
             if remainT < 5 :
                 p.start(25)
-                p.ChangeFrequency(scale[list[i]])
             remainT-=1
             i+=1
         p.stop()
