@@ -31,10 +31,11 @@ def loop():
         elif  signal==2:
             
             GPIO.output(26, GPIO.HIGH)
-            k=10
+            k=20
             for i in range(10):
-                time.sleep(1)
-                k-=1
+                time.sleep(2)
+                k-= 2
+                print(k)
                 string = str(k)
                 number = Tp.RFID()
                 number.Write(string)
